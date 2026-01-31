@@ -32,6 +32,9 @@ function toolDisplayName(name: string): string {
     grep: "Grep",
     find: "FindFiles",
     ls: "ListDir",
+    glob: "Glob",
+    web_search: "WebSearch",
+    web_fetch: "WebFetch",
   };
   return map[name] || name;
 }
@@ -40,6 +43,7 @@ function formatToolArgs(name: string, args: unknown): string {
   if (!args || typeof args !== "object") return "";
   const record = args as Record<string, unknown>;
   const get = (key: string) => (record[key] !== undefined ? String(record[key]) : "");
+  const truncate = (s: string, max: number) => (s.length > max ? s.slice(0, max) + "…" : s);
   switch (name) {
     case "read":
       return get("path") || get("file");
@@ -57,19 +61,111 @@ function formatToolArgs(name: string, args: unknown): string {
       return get("command");
     case "process":
       return [get("action"), get("id")].filter(Boolean).join(" ");
+    case "glob":
+      return [get("pattern"), get("cwd")].filter(Boolean).join(" in ");
+    case "web_search":
+      return truncate(get("query"), 50);
+    case "web_fetch": {
+      const url = get("url");
+      try {
+        const parsed = new URL(url);
+        return parsed.hostname + (parsed.pathname !== "/" ? truncate(parsed.pathname, 30) : "");
+      } catch {
+        return truncate(url, 50);
+      }
+    }
     default:
       return "";
   }
 }
 
-function formatToolLine(name: string, args: unknown): string {
+function formatToolLine(name: string, args: unknown, result?: unknown): string {
   const title = colors.toolName(toolDisplayName(name));
   const argText = formatToolArgs(name, args);
+  const resultSummary = formatResultSummary(name, result);
   const bullet = colors.toolBullet("•");
+
+  let line = `${bullet} ${title}`;
   if (argText) {
-    return `${bullet} ${title} ${colors.toolArgs(`(${argText})`)}`;
+    line += ` ${colors.toolArgs(`(${argText})`)}`;
   }
-  return `${bullet} ${title}`;
+  if (resultSummary) {
+    line += ` ${colors.toolArrow("→")} ${colors.toolArgs(resultSummary)}`;
+  }
+  return line;
+}
+
+function extractResultDetails(result: unknown): Record<string, unknown> | null {
+  if (!result || typeof result !== "object") return null;
+
+  // Try to extract from AgentMessage content array (JSON result)
+  const msg = result as { content?: Array<{ type: string; text?: string }> };
+  if (Array.isArray(msg.content)) {
+    for (const c of msg.content) {
+      if (c.type === "text" && c.text) {
+        try {
+          return JSON.parse(c.text) as Record<string, unknown>;
+        } catch {
+          continue;
+        }
+      }
+    }
+  }
+
+  // Try direct object access
+  return result as Record<string, unknown>;
+}
+
+function formatResultSummary(name: string, result: unknown): string {
+  const details = extractResultDetails(result);
+  if (!details) return "";
+
+  const truncate = (s: string, max: number) => (s.length > max ? s.slice(0, max) + "…" : s);
+
+  switch (name) {
+    case "glob": {
+      const count = details.count ?? (Array.isArray(details.files) ? details.files.length : 0);
+      const truncated = details.truncated ? "+" : "";
+      return `${count}${truncated} files`;
+    }
+    case "web_search": {
+      if (details.error) return `error: ${details.message || details.error}`;
+      const provider = details.provider || "search";
+      if (details.content) {
+        // Perplexity result
+        const citations = Array.isArray(details.citations) ? details.citations.length : 0;
+        return `${citations} citations`;
+      }
+      // Brave result
+      const count = details.count ?? (Array.isArray(details.results) ? details.results.length : 0);
+      return `${count} results`;
+    }
+    case "web_fetch": {
+      if (details.error) return `error: ${details.message || details.error}`;
+      const parts: string[] = [];
+      if (details.title) {
+        parts.push(`"${truncate(String(details.title), 30)}"`);
+      }
+      if (typeof details.length === "number") {
+        const kb = (details.length / 1024).toFixed(1);
+        parts.push(`${kb}KB`);
+      }
+      if (details.cached) {
+        parts.push("cached");
+      }
+      return parts.join(", ");
+    }
+    case "grep": {
+      // Try to count matches from result text
+      const text = extractText(result as AgentMessage | undefined);
+      if (text.includes("No matches found")) return "no matches";
+      const lines = text.split("\n").filter((l) => l.trim()).length;
+      if (lines > 0) return `${lines} matches`;
+      return "";
+    }
+    default:
+      return "";
+  }
 }
 
 export function createAgentOutput(params: {
@@ -151,14 +247,14 @@ export function createAgentOutput(params: {
         break;
       }
       case "tool_execution_end": {
-        // Stop spinner and show final result
+        // Stop spinner and show final result with summary
         if (event.isError) {
           const errorText = extractText(event.result) || "Tool failed";
           const bullet = colors.toolError("✗");
           const title = colors.toolName(toolDisplayName(event.toolName));
           spinner.stop(`${bullet} ${title}: ${colors.toolError(errorText)}`);
         } else {
-          spinner.stop(formatToolLine(event.toolName, pendingToolArgs));
+          spinner.stop(formatToolLine(event.toolName, pendingToolArgs, event.result));
         }
         pendingToolName = "";
         pendingToolArgs = null;
