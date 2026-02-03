@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 // Types matching the IPC response from main process
 // ============================================================================
 
-export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting'
+export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'registered'
 
 export interface HubInfo {
   hubId: string
