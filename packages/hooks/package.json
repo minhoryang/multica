@@ -7,14 +7,18 @@
     ".": "./src/index.ts",
     "./*": "./src/*.ts"
   },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
   "dependencies": {
     "@multica/sdk": "workspace:*",
     "react": "catalog:",
-    "uuid": "^13.0.0"
+    "uuid": "catalog:"
   },
   "devDependencies": {
     "@types/react": "catalog:",
-    "@types/uuid": "^11.0.0",
+    "@types/uuid": "catalog:",
     "typescript": "catalog:"
   }
 }

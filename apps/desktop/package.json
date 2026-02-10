@@ -4,14 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build && electron-builder",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "dev": "electron-vite dev",
+    "build": "electron-vite build && electron-builder",
+    "preview": "electron-vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
-    "@hugeicons/core-free-icons": "^3.1.1",
-    "@hugeicons/react": "^1.1.4",
+    "@hugeicons/core-free-icons": "catalog:",
+    "@hugeicons/react": "catalog:",
+    "@multica/core": "workspace:*",
     "@multica/hooks": "workspace:*",
     "@multica/sdk": "workspace:*",
     "@multica/store": "workspace:*",
@@ -20,27 +21,27 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-router-dom": "^7.13.0",
-    "socket.io-client": "^4.8.3",
-    "uuid": "^13.0.0",
+    "socket.io-client": "catalog:",
+    "uuid": "catalog:",
     "zustand": "catalog:"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.18",
+    "@tailwindcss/vite": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
     "@vitejs/plugin-react": "^4.2.1",
-    "electron": "^30.0.1",
-    "electron-builder": "^24.13.3",
+    "electron": "^33.4.11",
+    "electron-builder": "^26.7.0",
+    "electron-builder-squirrel-windows": "^26.7.0",
+    "electron-vite": "^5.0.0",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
-    "tailwindcss": "^4",
+    "tailwindcss": "catalog:",
     "typescript": "catalog:",
-    "vite": "^5.1.6",
-    "vite-plugin-electron": "^0.28.6",
-    "vite-plugin-electron-renderer": "^0.14.5"
+    "vite": "^5.1.6"
   },
-  "main": "dist-electron/main.js"
+  "main": "./out/main/index.js"
 }

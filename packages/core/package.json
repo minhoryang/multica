@@ -1,0 +1,75 @@
+{
+  "name": "@multica/core",
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./agent": {
+      "types": "./dist/agent/index.d.ts",
+      "import": "./dist/agent/index.js"
+    },
+    "./hub": {
+      "types": "./dist/hub/index.d.ts",
+      "import": "./dist/hub/index.js"
+    },
+    "./channels": {
+      "types": "./dist/channels/index.d.ts",
+      "import": "./dist/channels/index.js"
+    },
+    "./cron": {
+      "types": "./dist/cron/index.d.ts",
+      "import": "./dist/cron/index.js"
+    },
+    "./heartbeat": {
+      "types": "./dist/heartbeat/index.d.ts",
+      "import": "./dist/heartbeat/index.js"
+    },
+    "./media": {
+      "types": "./dist/media/index.d.ts",
+      "import": "./dist/media/index.js"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "import": "./dist/client/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@multica/types": "workspace:*",
+    "@multica/utils": "workspace:*",
+    "socket.io-client": "catalog:",
+    "@mariozechner/pi-agent-core": "catalog:",
+    "@mariozechner/pi-ai": "catalog:",
+    "@mariozechner/pi-coding-agent": "catalog:",
+    "@sinclair/typebox": "^0.34.41",
+    "chokidar": "^5.0.0",
+    "croner": "^10.0.1",
+    "fast-glob": "^3.3.3",
+    "grammy": "^1.39.3",
+    "json5": "^2.2.3",
+    "linkedom": "^0.18.12",
+    "turndown": "^7.2.2",
+    "undici": "^7.19.2",
+    "uuid": "catalog:",
+    "yaml": "^2.8.2"
+  },
+  "devDependencies": {
+    "@types/turndown": "^5.0.6",
+    "@types/uuid": "catalog:",
+    "tsup": "^8.0.0",
+    "typescript": "catalog:",
+    "vitest": "^4.0.18"
+  }
+}

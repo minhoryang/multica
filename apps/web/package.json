@@ -13,10 +13,10 @@
     "@multica/sdk": "workspace:*",
     "@multica/store": "workspace:*",
     "@multica/ui": "workspace:*",
-    "uuid": "^13.0.0",
+    "uuid": "catalog:",
     "zustand": "catalog:",
-    "@hugeicons/core-free-icons": "^3.1.1",
-    "@hugeicons/react": "^1.1.4",
+    "@hugeicons/core-free-icons": "catalog:",
+    "@hugeicons/react": "catalog:",
     "next": "16.1.6",
     "next-themes": "^0.4.6",
     "react": "catalog:",
@@ -26,7 +26,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "eslint": "^9",
+    "eslint": "catalog:",
     "eslint-config-next": "16.1.6",
     "typescript": "catalog:"
   }

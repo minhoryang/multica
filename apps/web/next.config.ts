@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@multica/ui", "@multica/store"],
+  transpilePackages: ["@multica/ui", "@multica/store", "@multica/hooks", "@multica/sdk"],
   headers: async () => [
     {
       source: "/sw.js",

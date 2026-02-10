@@ -7,6 +7,10 @@
     ".": "./src/index.ts",
     "./*": "./src/*.ts"
   },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
   "dependencies": {
     "@multica/sdk": "workspace:*"
   },

@@ -1,0 +1,24 @@
+{
+  "name": "@multica/cli",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "multica": "./dist/index.js",
+    "mu": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@multica/core": "workspace:*",
+    "@multica/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsup": "^8.0.0",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}

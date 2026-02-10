@@ -3,10 +3,43 @@ packages:
   - "packages/*"
 
 catalog:
+  # Core React
   react: "19.2.3"
   react-dom: "19.2.3"
-  "@types/react": "^19"
-  "@types/react-dom": "^19"
-  "@types/node": "^25.0.10"
+  "@types/react": "^19.2.0"
+  "@types/react-dom": "^19.2.0"
+
+  # TypeScript & Node
   typescript: "^5.9.3"
+  "@types/node": "^25.0.10"
+
+  # State Management
   zustand: "^5.0.0"
+
+  # UI & Styling
+  tailwindcss: "^4"
+  "@tailwindcss/postcss": "^4"
+  "@tailwindcss/vite": "^4"
+  tailwind-merge: "^3.4.0"
+  class-variance-authority: "^0.7.1"
+  clsx: "^2.1.1"
+
+  # Icons
+  "@hugeicons/react": "^1.1.4"
+  "@hugeicons/core-free-icons": "^3.1.1"
+
+  # Networking
+  socket.io-client: "^4.8.3"
+  uuid: "^13.0.0"
+  "@types/uuid": "^11.0.0"
+
+  # AI SDK
+  "@mariozechner/pi-agent-core": "^0.52.9"
+  "@mariozechner/pi-ai": "^0.52.9"
+  "@mariozechner/pi-coding-agent": "^0.52.9"
+
+  # Linting
+  eslint: "^9"
+
+  # Dev Tools
+  tsx: "^4.20.1"

@@ -9,13 +9,13 @@
     "mu": "./bin/multica.mjs"
   },
   "scripts": {
-    "multica": "tsx src/agent/cli/index.ts",
-    "mu": "tsx src/agent/cli/index.ts",
-    "dev": "tsx src/agent/cli/index.ts dev",
-    "dev:desktop": "tsx src/agent/cli/index.ts dev desktop",
-    "dev:gateway": "tsx src/agent/cli/index.ts dev gateway",
-    "dev:web": "tsx src/agent/cli/index.ts dev web",
-    "dev:all": "tsx src/agent/cli/index.ts dev all",
+    "multica": "pnpm --filter @multica/cli dev",
+    "mu": "pnpm --filter @multica/cli dev",
+    "dev": "pnpm --filter @multica/cli dev -- dev",
+    "dev:desktop": "pnpm --filter @multica/cli dev -- dev desktop",
+    "dev:gateway": "pnpm --filter @multica/cli dev -- dev gateway",
+    "dev:web": "pnpm --filter @multica/cli dev -- dev web",
+    "dev:all": "pnpm --filter @multica/cli dev -- dev all",
     "build": "turbo build",
     "build:sdk": "pnpm --filter @multica/sdk build",
     "build:cli": "node scripts/build-cli.js",
@@ -33,12 +33,16 @@
     "onlyBuiltDependencies": [
       "electron",
       "esbuild"
-    ]
+    ],
+    "overrides": {
+      "@types/react": "catalog:",
+      "@types/react-dom": "catalog:"
+    }
   },
   "devDependencies": {
     "@types/node": "catalog:",
     "@types/turndown": "^5.0.6",
-    "@types/uuid": "^11.0.0",
+    "@types/uuid": "catalog:",
     "@vitest/coverage-v8": "^4.0.18",
     "concurrently": "^9.2.1",
     "esbuild": "^0.27.2",
@@ -48,9 +52,9 @@
     "vitest": "^4.0.18"
   },
   "dependencies": {
-    "@mariozechner/pi-agent-core": "^0.52.9",
-    "@mariozechner/pi-ai": "^0.52.9",
-    "@mariozechner/pi-coding-agent": "^0.52.9",
+    "@mariozechner/pi-agent-core": "catalog:",
+    "@mariozechner/pi-ai": "catalog:",
+    "@mariozechner/pi-coding-agent": "catalog:",
     "@mozilla/readability": "^0.6.0",
     "@multica/sdk": "workspace:*",
     "@multica/store": "workspace:*",
@@ -61,6 +65,7 @@
     "@nestjs/serve-static": "^5.0.4",
     "@nestjs/websockets": "^11.1.12",
     "@sinclair/typebox": "^0.34.41",
+    "chokidar": "^5.0.0",
     "croner": "^10.0.1",
     "fast-glob": "^3.3.3",
     "grammy": "^1.39.3",
@@ -74,10 +79,10 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "socket.io": "^4.8.3",
-    "socket.io-client": "^4.8.3",
+    "socket.io-client": "catalog:",
     "turndown": "^7.2.2",
     "undici": "^7.19.2",
-    "uuid": "^13.0.0",
+    "uuid": "catalog:",
     "yaml": "^2.8.2"
   }
 }

@@ -13,13 +13,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "socket.io-client": "^4.8.3",
-    "uuid": "^13.0.0"
+    "socket.io-client": "catalog:",
+    "uuid": "catalog:"
   },
   "devDependencies": {
-    "@mariozechner/pi-agent-core": "^0.50.3",
-    "@mariozechner/pi-ai": "^0.50.3",
-    "@types/uuid": "^11.0.0",
-    "typescript": "^5.9.3"
+    "@mariozechner/pi-agent-core": "catalog:",
+    "@mariozechner/pi-ai": "catalog:",
+    "@types/uuid": "catalog:",
+    "typescript": "catalog:"
   }
 }

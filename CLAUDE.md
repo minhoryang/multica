@@ -8,13 +8,27 @@ Super Multica is a distributed AI agent framework with a monorepo architecture. 
 
 ## Monorepo Structure
 
-- **`src/`** — Core modules (agent engine, gateway, hub, shared types)
-- **`apps/desktop`** — Electron + Vite + React desktop app (`@multica/desktop`) — **primary development target**
-- **`apps/web`** — Next.js 16 web app (`@multica/web`, port 3001)
-- **`packages/ui`** — Shared UI component library (`@multica/ui`, Shadcn/Tailwind CSS v4)
-- **`packages/sdk`** — Gateway client SDK (`@multica/sdk`, Socket.io)
-- **`packages/store`** — Zustand state management (`@multica/store`)
-- **`skills/`** — Bundled agent skills (commit, code-review, skill-creator)
+```
+super-multica/
+├── apps/
+│   ├── cli/           ← Command-line interface (`@multica/cli`)
+│   ├── desktop/       ← Electron + Vite + React (`@multica/desktop`) — primary target
+│   ├── gateway/       ← NestJS WebSocket gateway (`@multica/gateway`)
+│   ├── server/        ← NestJS REST API server (`@multica/server`)
+│   ├── web/           ← Next.js 16 web app (`@multica/web`, port 3001)
+│   └── mobile/        ← React Native mobile app (`@multica/mobile`)
+│
+├── packages/
+│   ├── core/          ← Core agent engine, hub, channels (`@multica/core`)
+│   ├── sdk/           ← Gateway client SDK (`@multica/sdk`, Socket.io)
+│   ├── ui/            ← Shared UI components (`@multica/ui`, Shadcn/Tailwind v4)
+│   ├── store/         ← Zustand state management (`@multica/store`)
+│   ├── hooks/         ← React hooks (`@multica/hooks`)
+│   ├── types/         ← Shared TypeScript types (`@multica/types`)
+│   └── utils/         ← Utility functions (`@multica/utils`)
+│
+└── skills/            ← Bundled agent skills
+```
 
 ## Common Commands
 
@@ -23,33 +37,35 @@ Super Multica is a distributed AI agent framework with a monorepo architecture. 
 pnpm install
 
 # Multica CLI (unified entry point)
-multica                   # Interactive mode (default)
-multica run "<prompt>"    # Run a single prompt
-multica chat              # Interactive REPL mode
-multica session list      # List sessions
-multica profile list      # List profiles
-multica skills list       # List skills
-multica tools list        # List tools
-multica credentials init  # Initialize credentials
-multica dev               # Start desktop app (default)
-multica help              # Show help
+pnpm multica                   # Interactive mode (default)
+pnpm multica run "<prompt>"    # Run a single prompt
+pnpm multica chat              # Interactive REPL mode
+pnpm multica session list      # List sessions
+pnpm multica profile list      # List profiles
+pnpm multica skills list       # List skills
+pnpm multica tools list        # List tools
+pnpm multica credentials init  # Initialize credentials
+pnpm multica help              # Show help
 
 # Development servers
-multica dev               # Desktop app (default, recommended)
-multica dev gateway       # WebSocket gateway only (for remote clients)
-multica dev web           # Next.js web app
-multica dev all           # Gateway + web app
+pnpm dev                       # Desktop app (default, recommended)
+pnpm dev:desktop               # Desktop app
+pnpm dev:gateway               # WebSocket gateway only
+pnpm dev:web                   # Next.js web app
+pnpm dev:all                   # Gateway + web app
 
-# Build (turbo-orchestrated)
-pnpm build
+# Build
+pnpm build                     # Build all (turbo-orchestrated)
+pnpm --filter @multica/desktop build
+pnpm --filter @multica/core build
 
 # Type checking
 pnpm typecheck
 
-# Testing (vitest, tests live in src/**/*.test.ts)
-pnpm test                 # Single run
-pnpm test:watch           # Watch mode
-pnpm test:coverage        # With v8 coverage
+# Testing (vitest)
+pnpm test                      # Single run
+pnpm test:watch                # Watch mode
+pnpm test:coverage             # With v8 coverage
 ```
 
 ## Architecture
@@ -66,21 +82,41 @@ Web App (requires Gateway)
       → Hub + Agent Engine
 ```
 
-**Agent Engine** (`src/agent/`): Orchestrates LLM interactions with multi-provider support (OpenAI, Anthropic, DeepSeek, Kimi, Groq, Mistral, Google, Together). Features session management (JSONL-based, UUIDv7 IDs), profile system (`~/.super-multica/agent-profiles/`), modular skills with hot-reload, and token-aware context window guards (compaction modes: tokens, count, summary). Unified CLI in `src/agent/cli/index.ts` with subcommands in `src/agent/cli/commands/`.
+**Agent Engine** (`packages/core/src/agent/`): Orchestrates LLM interactions with multi-provider support (OpenAI, Anthropic, DeepSeek, Kimi, Groq, Mistral, Google, Together). Features session management (JSONL-based, UUIDv7 IDs), profile system (`~/.super-multica/agent-profiles/`), modular skills with hot-reload, and token-aware context window guards.
 
-**Hub** (`src/hub/`): Manages agents and communication channels. Embedded in desktop app, or runs standalone for web clients.
+**Hub** (`packages/core/src/hub/`): Manages agents and communication channels. Embedded in desktop app, or runs standalone for web clients.
 
-**Gateway** (`src/gateway/`): NestJS WebSocket server with Socket.io for remote client access, message routing, and device verification.
+**Gateway** (`apps/gateway/`): NestJS WebSocket server with Socket.io for remote client access, message routing, and device verification.
+
+**CLI** (`apps/cli/`): Command-line interface. Entry point: `apps/cli/src/index.ts`.
 
 ## Tech Stack & Config
 
 - **Package manager**: pnpm 10 with workspaces (`pnpm-workspace.yaml`)
 - **Build orchestration**: Turborepo (`turbo.json`)
-- **TypeScript**: ESNext target, NodeNext modules, strict mode, `verbatimModuleSyntax`, `experimentalDecorators` (NestJS)
-- **Testing**: Vitest with globals enabled, node environment
-- **Frontend**: React 19, Next.js 16, Tailwind CSS v4, Shadcn/UI (zinc base, hugeicons)
+- **TypeScript**: ESNext target, NodeNext modules, strict mode
+- **Testing**: Vitest with globals enabled
+- **Frontend**: React 19, Next.js 16, Tailwind CSS v4, Shadcn/UI
 - **Backend**: NestJS 11, Socket.io, Pino logging
-- **CLI bundling**: esbuild → `bin/` directory
+- **Desktop**: Electron 33+, electron-vite, electron-builder
+
+## pnpm Configuration
+
+**Required `.npmrc` for Electron packaging:**
+
+```ini
+shamefully-hoist=true
+```
+
+After adding/changing `.npmrc`:
+
+```bash
+rm -rf node_modules apps/*/node_modules packages/*/node_modules
+rm pnpm-lock.yaml
+pnpm install
+```
+
+See `docs/package-management.md` for detailed package management guide.
 
 ## Code Style
 
@@ -88,46 +124,36 @@ Web App (requires Gateway)
 
 ## Credentials Setup
 
-Use JSON5 credential files instead of `.env`:
-
 ```bash
-multica credentials init
+pnpm multica credentials init
 ```
 
-This creates:
+Creates:
 - `~/.super-multica/credentials.json5` (LLM providers + built-in tools)
 - `~/.super-multica/skills.env.json5` (skills / plugins / integrations)
 
 ## Atomic Commits
 
-After completing any task that modifies code, you MUST create atomic commits before ending the conversation.
+After completing any task that modifies code, create atomic commits:
 
 1. Run `git status` and `git diff` to see all modifications
 2. Skip if no changes exist
 3. Group changes by logical purpose (feature, fix, refactor, docs, test, chore)
 4. Stage and commit each group separately
 
-**Format**: Conventional commits — `<type>(<scope>): <description>`
+**Format**: `<type>(<scope>): <description>`
 
 Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
 
-**Rules**:
-- Each commit should be independently meaningful and buildable
-- Related test files go with their implementation
-- Never create empty commits or combine unrelated changes
-- If all changes are related to one logical unit, a single commit is fine
-- Keep commit messages concise but descriptive
-- `git commit --amend` only for immediate small fixes to the last commit
-
 ### Examples
 
-If you modified:
-- `src/api/user.ts` (added new endpoint)
-- `src/api/user.test.ts` (tests for new endpoint)
-- `src/utils/format.ts` (refactored helper)
-- `README.md` (updated docs)
+```bash
+git add packages/core/src/agent/runner.ts packages/core/src/agent/runner.test.ts
+git commit -m "feat(agent): add streaming support"
 
-Create three commits:
-1. `git add src/api/user.ts src/api/user.test.ts && git commit -m "feat(api): add user profile endpoint"`
-2. `git add src/utils/format.ts && git commit -m "refactor(utils): simplify date formatting logic"`
-3. `git add README.md && git commit -m "docs: update API documentation"`
+git add packages/utils/src/format.ts
+git commit -m "refactor(utils): simplify date formatting"
+
+git add README.md
+git commit -m "docs: update API documentation"
+```
