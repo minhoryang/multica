@@ -50,11 +50,9 @@ export function TelegramConnectQR({
         if (cancelled) return
 
         if (!res.ok) {
-          if (res.status === 503) {
-            setError('Telegram bot not configured on Gateway')
-          } else {
-            setError(`Gateway error: ${res.statusText}`)
-          }
+          const body = (await res.json().catch(() => null)) as { message?: string } | null
+          const detail = body?.message || `HTTP ${res.status}`
+          setError(`Gateway error (${res.status}): ${detail}`)
           setDeepLink(null)
           return
         }
