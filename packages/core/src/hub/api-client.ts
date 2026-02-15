@@ -19,7 +19,7 @@ export function getAuthHeaders(context?: string): Record<string, string> {
   if (!auth) {
     const suffix = context ? ` ${context}` : "";
     throw new Error(
-      `Not logged in. Please sign in via the Desktop app${suffix}.`,
+      `Not logged in${suffix}. Sign in via the Desktop app, or run pnpm dev:local and log in there.`,
     );
   }
   return {

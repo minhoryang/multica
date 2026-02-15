@@ -232,6 +232,7 @@ After running, the Coding Agent should:
 
 - **`SMC_DATA_DIR=~/.super-multica-e2e`** isolates E2E test sessions from dev (`~/.super-multica-dev`) and production (`~/.super-multica`) data. Always set this.
 - **`MULTICA_API_URL=https://api-dev.copilothub.ai`** is required for `web_search` and `data` tools. Without it, these tools fail with `MULTICA_API_URL is required`.
+- **Auth for `web_search`/`data`**: These tools need dev backend auth. The auth store auto-falls back to `~/.super-multica-dev/auth.json`. If missing, run `pnpm dev:local` first and log in through the Desktop app.
 - Default provider is `kimi-coding`. Override with `--provider`.
 - Run-log and session data are at `~/.super-multica-e2e/sessions/{sessionId}/`
 - Detailed guide with feature-specific test playbooks: `docs/e2e-testing-guide.md`

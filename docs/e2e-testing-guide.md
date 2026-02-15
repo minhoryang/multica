@@ -23,6 +23,7 @@ This approach is superior to static assertions because:
 3. **Default provider**: `kimi-coding` (Kimi Code, free tier available). Can override with `--provider`
 4. **`MULTICA_API_URL`**: Required for `web_search` and `data` tools. Set to `https://api-dev.copilothub.ai` for dev environment. Without this, web search and financial data tools will fail with `MULTICA_API_URL is required`
 5. **`SMC_DATA_DIR`**: Set to `~/.super-multica-e2e` to isolate E2E test sessions from dev (`~/.super-multica-dev`) and production (`~/.super-multica`) data. Without this, test sessions pollute the production sessions directory
+6. **Dev auth for `web_search`/`data` tools**: These tools authenticate via `auth.json` (session ID + device ID). The auth store automatically falls back to `~/.super-multica-dev/auth.json` when the E2E data dir has no auth. If `~/.super-multica-dev/auth.json` doesn't exist, run `pnpm dev:local` first and log in through the Desktop app to create it
 
 ## Running a Test
 
