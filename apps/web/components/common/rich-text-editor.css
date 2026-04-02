@@ -192,6 +192,16 @@
   text-underline-offset: 2px;
 }
 
+/* Issue mention cards — override link styling */
+.rich-text-editor a.issue-mention {
+  color: inherit;
+  text-decoration: none;
+}
+
+.rich-text-editor a.issue-mention:hover {
+  text-decoration: none;
+}
+
 /* Mentions */
 .rich-text-editor .mention {
   color: var(--primary);
@@ -212,6 +222,23 @@
 .rich-text-editor s {
   text-decoration: line-through;
   color: var(--muted-foreground);
+}
+
+/* Readonly mode overrides */
+.rich-text-editor.readonly.ProseMirror {
+  caret-color: transparent;
+  cursor: default;
+}
+
+/* Mention NodeView inline layout fix */
+.rich-text-editor [data-node-view-wrapper] {
+  display: inline;
+}
+
+/* Images in readonly mode */
+.rich-text-editor.readonly img {
+  border-radius: var(--radius);
+  margin: 0.5rem 0;
 }
 
 /* Uploading image placeholder (blob: URLs = in-flight uploads) */

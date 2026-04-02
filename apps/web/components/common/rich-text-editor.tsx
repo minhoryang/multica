@@ -13,14 +13,14 @@ import { common, createLowlight } from "lowlight";
 import Placeholder from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
 import Typography from "@tiptap/extension-typography";
-import Mention from "@tiptap/extension-mention";
 import Image from "@tiptap/extension-image";
 import { Markdown } from "@tiptap/markdown";
-import { Extension, mergeAttributes } from "@tiptap/core";
+import { Extension } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Slice } from "@tiptap/pm/model";
 import { cn } from "@/lib/utils";
 import type { UploadResult } from "@/shared/hooks/use-file-upload";
+import { BaseMentionExtension } from "./mention-extension";
 import { createMentionSuggestion } from "./mention-suggestion";
 import { CodeBlockView } from "./code-block-view";
 import "./rich-text-editor.css";
@@ -58,68 +58,9 @@ const LinkExtension = Link.configure({
   },
 });
 
-const MentionExtension = Mention.configure({
+const MentionExtension = BaseMentionExtension.configure({
   HTMLAttributes: { class: "mention" },
   suggestion: createMentionSuggestion(),
-}).extend({
-  renderHTML({ node, HTMLAttributes }) {
-    const type = node.attrs.type ?? "member";
-    const prefix = type === "issue" ? "" : "@";
-    return [
-      "span",
-      mergeAttributes(
-        { "data-type": "mention" },
-        this.options.HTMLAttributes,
-        HTMLAttributes,
-        {
-          "data-mention-type": node.attrs.type ?? "member",
-          "data-mention-id": node.attrs.id,
-        },
-      ),
-      `${prefix}${node.attrs.label ?? node.attrs.id}`,
-    ];
-  },
-  addAttributes() {
-    return {
-      ...this.parent?.(),
-      type: {
-        default: "member",
-        parseHTML: (el: HTMLElement) =>
-          el.getAttribute("data-mention-type") ?? "member",
-        renderHTML: () => ({}),
-      },
-    };
-  },
-  // @tiptap/markdown: custom tokenizer to parse [@Label](mention://type/id)
-  // and [Label](mention://issue/id) (issue mentions have no @ prefix)
-  markdownTokenizer: {
-    name: "mention",
-    level: "inline" as const,
-    start(src: string) {
-      return src.search(/\[@?[^\]]+\]\(mention:\/\//);
-    },
-    tokenize(src: string) {
-      const match = src.match(
-        /^\[@?([^\]]+)\]\(mention:\/\/(\w+)\/([^)]+)\)/,
-      );
-      if (!match) return undefined;
-      return {
-        type: "mention",
-        raw: match[0],
-        attributes: { label: match[1], type: match[2] ?? "member", id: match[3] },
-      };
-    },
-  },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parseMarkdown: (token: any, helpers: any) => {
-    return helpers.createNode("mention", token.attributes);
-  },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  renderMarkdown: (node: any) => {
-    const { id, label, type = "member" } = node.attrs || {};
-    const prefix = type === "issue" ? "" : "@";
-    return `[${prefix}${label ?? id}](mention://${type}/${id})`;
-  },
 });
 
 // ---------------------------------------------------------------------------

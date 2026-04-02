@@ -8,12 +8,14 @@ import {
   useRef,
   useState,
 } from "react";
-import { Hash, Users } from "lucide-react";
 import { ReactRenderer } from "@tiptap/react";
 import { computePosition, offset, flip, shift } from "@floating-ui/dom";
 import { useWorkspaceStore } from "@/features/workspace";
 import { useIssueStore } from "@/features/issues";
 import { ActorAvatar } from "@/components/common/actor-avatar";
+import { StatusIcon } from "@/features/issues/components/status-icon";
+import { Badge } from "@/components/ui/badge";
+import type { IssueStatus } from "@/shared/types";
 import type { SuggestionOptions, SuggestionProps } from "@tiptap/suggestion";
 
 // ---------------------------------------------------------------------------
@@ -24,8 +26,10 @@ export interface MentionItem {
   id: string;
   label: string;
   type: "member" | "agent" | "issue" | "all";
-  /** Secondary text shown below the label (e.g. issue title) */
+  /** Secondary text shown beside the label (e.g. issue title) */
   description?: string;
+  /** Issue status for StatusIcon rendering */
+  status?: IssueStatus;
 }
 
 interface MentionListProps {
@@ -35,6 +39,33 @@ interface MentionListProps {
 
 export interface MentionListRef {
   onKeyDown: (props: { event: KeyboardEvent }) => boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Group items by section
+// ---------------------------------------------------------------------------
+
+interface MentionGroup {
+  label: string;
+  items: MentionItem[];
+}
+
+function groupItems(items: MentionItem[]): MentionGroup[] {
+  const users: MentionItem[] = [];
+  const issues: MentionItem[] = [];
+
+  for (const item of items) {
+    if (item.type === "issue") {
+      issues.push(item);
+    } else {
+      users.push(item);
+    }
+  }
+
+  const groups: MentionGroup[] = [];
+  if (users.length > 0) groups.push({ label: "Users", items: users });
+  if (issues.length > 0) groups.push({ label: "Issues", items: issues });
+  return groups;
 }
 
 // ---------------------------------------------------------------------------
@@ -88,44 +119,92 @@ const MentionList = forwardRef<MentionListRef, MentionListProps>(
       );
     }
 
+    const groups = groupItems(items);
+
+    // Build a flat index mapping: globalIndex → item
+    let globalIndex = 0;
+
     return (
-      <div className="rounded-md border bg-popover py-1 shadow-md min-w-[180px] max-h-[240px] overflow-y-auto">
-        {items.map((item, index) => (
-          <button
-            ref={(el) => { itemRefs.current[index] = el; }}
-            key={`${item.type}-${item.id}`}
-            className={`flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-sm transition-colors ${
-              index === selectedIndex ? "bg-accent" : "hover:bg-accent/50"
-            }`}
-            onClick={() => selectItem(index)}
-          >
-            {item.type === "all" ? (
-              <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <Users className="h-3 w-3" />
-              </span>
-            ) : item.type === "issue" ? (
-              <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <Hash className="h-3 w-3" />
-              </span>
-            ) : (
-              <ActorAvatar
-                actorType={item.type}
-                actorId={item.id}
-                size={20}
-              />
-            )}
-            <div className="flex flex-col min-w-0">
-              <span className="truncate">{item.label}</span>
-              {item.description && (
-                <span className="truncate text-xs text-muted-foreground">{item.description}</span>
-              )}
+      <div className="rounded-md border bg-popover py-1 shadow-md w-72 max-h-[300px] overflow-y-auto">
+        {groups.map((group) => (
+          <div key={group.label}>
+            <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground">
+              {group.label}
             </div>
-          </button>
+            {group.items.map((item) => {
+              const idx = globalIndex++;
+              return (
+                <MentionRow
+                  key={`${item.type}-${item.id}`}
+                  item={item}
+                  selected={idx === selectedIndex}
+                  onSelect={() => selectItem(idx)}
+                  buttonRef={(el) => { itemRefs.current[idx] = el; }}
+                />
+              );
+            })}
+          </div>
         ))}
       </div>
     );
   },
 );
+
+// ---------------------------------------------------------------------------
+// MentionRow — single item in the list
+// ---------------------------------------------------------------------------
+
+function MentionRow({
+  item,
+  selected,
+  onSelect,
+  buttonRef,
+}: {
+  item: MentionItem;
+  selected: boolean;
+  onSelect: () => void;
+  buttonRef: (el: HTMLButtonElement | null) => void;
+}) {
+  if (item.type === "issue") {
+    return (
+      <button
+        ref={buttonRef}
+        className={`flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-xs transition-colors ${
+          selected ? "bg-accent" : "hover:bg-accent/50"
+        }`}
+        onClick={onSelect}
+      >
+        {item.status && (
+          <StatusIcon status={item.status} className="h-3.5 w-3.5 shrink-0" />
+        )}
+        <span className="shrink-0 text-muted-foreground">{item.label}</span>
+        {item.description && (
+          <span className="truncate text-muted-foreground">{item.description}</span>
+        )}
+      </button>
+    );
+  }
+
+  return (
+    <button
+      ref={buttonRef}
+      className={`flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-xs transition-colors ${
+        selected ? "bg-accent" : "hover:bg-accent/50"
+      }`}
+      onClick={onSelect}
+    >
+      <ActorAvatar
+        actorType={item.type === "all" ? "member" : item.type}
+        actorId={item.id}
+        size={20}
+      />
+      <span className="truncate font-medium">{item.label}</span>
+      {item.type === "agent" && (
+        <Badge variant="outline" className="ml-auto text-[10px] h-4 px-1.5">Agent</Badge>
+      )}
+    </button>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Suggestion config factory
@@ -144,7 +223,7 @@ export function createMentionSuggestion(): Omit<
       // Show "All members" option when query is empty or matches "all"
       const allItem: MentionItem[] =
         "all members".includes(q) || "all".includes(q)
-          ? [{ id: "all", label: "All members", type: "all" as const, description: "Notify all members" }]
+          ? [{ id: "all", label: "All members", type: "all" as const }]
           : [];
 
       const memberItems: MentionItem[] = members
@@ -170,6 +249,7 @@ export function createMentionSuggestion(): Omit<
           label: i.identifier,
           type: "issue" as const,
           description: i.title,
+          status: i.status as IssueStatus,
         }));
 
       return [...allItem, ...memberItems, ...agentItems, ...issueItems].slice(0, 10);
